@@ -1,0 +1,26 @@
+{
+    "name": "Furiganer for Chrome",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "description": "Furiganer for chrome extension",
+    "icons": {
+        "16": "editing.png",
+        "48": "editing.png",
+        "128": "editing.png"
+    },
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "background",
+        "contextMenus",
+        "scripting",
+        "clipboardWrite",
+        "clipboardRead"
+    ],
+    "background": {
+        "service_worker": "furiganer.js"
+    },
+    "action": {
+        "default_title": "Furiganer"
+    }
+}
