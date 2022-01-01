@@ -1,1 +1,2 @@
-*env
+*contentScript*
+*http-request*
