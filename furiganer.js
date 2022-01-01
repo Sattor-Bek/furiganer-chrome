@@ -23,25 +23,53 @@ async function postData(input){
 	}
 	const request = {
 		method: "POST",
-		mode: "no-cors",
 		body: JSON.stringify(body)
 	}
-
-	const response = await fetch(baseUrl, request);
-	return response.json()
+	let data = {}
+	await fetch(baseUrl, request).then(response => {
+		if (!response.ok) {
+		  console.error('サーバーエラー');
+		}
+		data = response.json()
+	  })
+	  .catch(error => {
+		console.error('通信に失敗しました', error);
+	  });
+	return data 
 }
 
-function convert(input) {
-	let response = {}
+function convert(input, tab) {
+	let textData = []
 	postData(input).then(res => {
-		console.log("start coverting...")
-		response = res;
-		console.log("finished converting")
+		if(res.result && res.result.word){
+			textData = sortData(res.result.word)
+			textData = textData.join('');
+			chrome.scripting.executeScript({
+				target: { tabId: tab.id },
+				function: showAlert,
+				args:[textData]
+			});		
+		}
 	})
-	const result = JSON.stringify(response);
-	return result.result;
 }
 
+function sortData(words){
+	let wordList = []
+	if(words.length > 0){
+		words.forEach( word => {
+			if(word.subword && word.subword.length > 0){
+				word.subword.forEach( w => {
+					w.furigana === w.surface ? wordList.push(w.surface) : wordList.push("[" + w.surface + ":" + w.furigana + "]");
+				});
+			} else if(word.furigana) {
+				wordList.push("[" + word.surface + ":" + word.furigana + "]");
+			} else {
+				wordList.push(word.surface);
+			}
+		})
+	}
+	return wordList
+}
 
 chrome.action.onClicked.addListener((tab) => {
 	chrome.scripting.executeScript({
@@ -59,13 +87,6 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-	const text = info.selectionText;
-	const textData = convert(text)
-	//inject the text with furigana to clipboard
-		chrome.scripting.executeScript({
-			target: { tabId: tab.id },
-			function: showAlert,
-			args:[textData]
-		});		
-
+	const selected = info.selectionText;
+	convert(selected, tab)
 });

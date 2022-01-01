@@ -17,6 +17,9 @@
         "clipboardWrite",
         "clipboardRead"
     ],
+    "host_permissions":[
+        "https://jlp.yahooapis.jp/"
+    ],
     "background": {
         "service_worker": "furiganer.js"
     },
