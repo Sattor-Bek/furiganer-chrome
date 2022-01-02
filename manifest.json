@@ -13,9 +13,7 @@
         "activeTab",
         "background",
         "contextMenus",
-        "scripting",
-        "clipboardWrite",
-        "clipboardRead"
+        "scripting"
     ],
     "host_permissions":[
         "https://jlp.yahooapis.jp/"

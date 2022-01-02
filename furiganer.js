@@ -1,15 +1,25 @@
 importScripts("./contentScript.js");
 
-function showAlert(text) {
-	let str = "";
-	if(text){
-		str = text;
+function clipText(clipboardText) {
+	if(navigator && navigator.clipboard){
+		console.log("navigator.clipboard")
+		navigator.clipboard.writeText(clipboardText);
+		return navigator.clipboard.writeText(clipboardText);
 	} else {
-		str = document.title;
+		let textArea = document.createElement("textarea");
+        textArea.value = clipboardText;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        return new Promise((res, rej) => {
+            document.execCommand('copy') ? res() : rej();
+            textArea.remove();
+        });
 	}
-	alert(str);
-} // this function will be replaced
-
+}
 
 async function postData(input){
 	const body = {
@@ -28,12 +38,12 @@ async function postData(input){
 	let data = {}
 	await fetch(baseUrl, request).then(response => {
 		if (!response.ok) {
-		  console.error('サーバーエラー');
+		  console.error('Server Error');
 		}
 		data = response.json()
 	  })
 	  .catch(error => {
-		console.error('通信に失敗しました', error);
+		console.error('Connection failed', error);
 	  });
 	return data 
 }
@@ -46,11 +56,12 @@ function convert(input, tab) {
 			textData = textData.join('');
 			chrome.scripting.executeScript({
 				target: { tabId: tab.id },
-				function: showAlert,
+				function: clipText,
 				args:[textData]
-			});		
+			});	
 		}
 	})
+	
 }
 
 function sortData(words){
@@ -71,12 +82,7 @@ function sortData(words){
 	return wordList
 }
 
-chrome.action.onClicked.addListener((tab) => {
-	chrome.scripting.executeScript({
-		target: { tabId: tab.id },
-		function: showAlert
-	});
-});
+
 
 chrome.runtime.onInstalled.addListener(() => {
 	chrome.contextMenus.create({
